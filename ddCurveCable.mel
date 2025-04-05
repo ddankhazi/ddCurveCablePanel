@@ -1,0 +1,2493 @@
+// Generate Locators on Selected Meshes
+global proc ddLocatorGen()
+{    
+    //Dialog popup to get a value from the user
+    string $resultNumOfCurves = `promptDialog 
+    -title "Enter Number Locators" 
+    -message "Number of Locators:" 
+    -text "10"
+    -button "OK" 
+    -button "Cancel" 
+    -defaultButton "OK" 
+    -cancelButton "Cancel" 
+    -dismissString "Cancel"`;
+    
+    int $numCurves = 10;
+    
+    // Check if the user clicked OK
+    if ($resultNumOfCurves == "OK") 
+    {
+        // Get the entered value
+        string $enteredValue = `promptDialog -query -text`;
+
+        // Convert the string to a float
+        $numCurves = $enteredValue;
+        // Use the float value as needed
+        print("Used Number of Locators is: " + $enteredValue + "\n");
+    }
+    
+    
+    string $selection[] = `ls -sl`;
+    
+    if (size($selection) == 0) {
+        warning "Please select at least one polygon object.";
+    } else {
+        for ($index = 0; $index < size($selection); $index++) {
+            string $obj = $selection[$index];
+            string $shapeArray[] = `listRelatives -children -type "mesh" $obj`;
+            string $shape = "";
+            if (size($shapeArray) > 0) {
+                $shape = $shapeArray[0];
+            }
+            if (size($shapeArray) == 0) {
+                warning ($obj + " does not have a polygon shape.");
+                continue;
+            }
+            
+            float $bbox[] = `xform -q -ws -bb $obj`;
+            float $minX = $bbox[0], $minY = $bbox[1], $minZ = $bbox[2];
+            float $maxX = $bbox[3], $maxY = $bbox[4], $maxZ = $bbox[5];
+            
+            string $group = `group -em -name ($obj + "_locators")`;
+            
+            string $locators[];
+            for ($i = 0; $i < $numCurves; $i++) {
+                float $randX = rand($minX, $maxX);
+                float $randY = rand($minY, $maxY);
+                float $randZ = rand($minZ, $maxZ);
+                
+                string $locator[] = `spaceLocator -name ($group + "_locator_" + $i)`;
+                xform -worldSpace -translation $randX $randY $randZ $locator;
+                parent $locator[0] $group;
+                $locators[size($locators)] = $locator[0];
+            }
+            
+            for ($loc in $locators) {
+                setAttr ($loc + "Shape.localScaleX") 10;
+                setAttr ($loc + "Shape.localScaleY") 10;
+                setAttr ($loc + "Shape.localScaleZ") 10;
+                string $constraint[] = `geometryConstraint -weight 1 $obj $loc`;
+                delete $constraint;
+            }
+        }
+    }
+}
+
+// Generate Locators on Selected Meshes with Parent constraints
+global proc ddLocatorGenConstrained()
+{    
+    //Dialog popup to get a value from the user
+    string $resultNumOfCurves = `promptDialog 
+    -title "Enter Number Locators" 
+    -message "Number of Locators:" 
+    -text "10"
+    -button "OK" 
+    -button "Cancel" 
+    -defaultButton "OK" 
+    -cancelButton "Cancel" 
+    -dismissString "Cancel"`;
+    
+    int $numCurves = 10;
+    
+    // Check if the user clicked OK
+    if ($resultNumOfCurves == "OK") 
+    {
+        // Get the entered value
+        string $enteredValue = `promptDialog -query -text`;
+
+        // Convert the string to a float
+        $numCurves = $enteredValue;
+        // Use the float value as needed
+        print("Used Number of Locators is: " + $enteredValue + "\n");
+    }
+    
+    
+    string $selection[] = `ls -sl`;
+    
+    if (size($selection) == 0) {
+        warning "Please select at least one polygon object.";
+    } else {
+        for ($index = 0; $index < size($selection); $index++) {
+            string $obj = $selection[$index];
+            string $shapeArray[] = `listRelatives -children -type "mesh" $obj`;
+            string $shape = "";
+            if (size($shapeArray) > 0) {
+                $shape = $shapeArray[0];
+            }
+            if (size($shapeArray) == 0) {
+                warning ($obj + " does not have a polygon shape.");
+                continue;
+            }
+            
+            float $bbox[] = `xform -q -ws -bb $obj`;
+            float $minX = $bbox[0], $minY = $bbox[1], $minZ = $bbox[2];
+            float $maxX = $bbox[3], $maxY = $bbox[4], $maxZ = $bbox[5];
+            
+            string $group = `group -em -name ($obj + "_locators")`;
+            
+            string $locators[];
+            for ($i = 0; $i < $numCurves; $i++) {
+                float $randX = rand($minX, $maxX);
+                float $randY = rand($minY, $maxY);
+                float $randZ = rand($minZ, $maxZ);
+                
+                string $locator[] = `spaceLocator -name ($group + "_locator_" + $i)`;
+                xform -worldSpace -translation $randX $randY $randZ $locator;
+                parent $locator[0] $group;
+                $locators[size($locators)] = $locator[0];
+            }
+            
+            for ($loc in $locators) {
+                setAttr ($loc + "Shape.localScaleX") 10;
+                setAttr ($loc + "Shape.localScaleY") 10;
+                setAttr ($loc + "Shape.localScaleZ") 10;
+                string $constraint[] = `geometryConstraint -weight 1 $obj $loc`;
+                delete $constraint;
+                string $pConstraint[] = `parentConstraint -mo -weight 1 $obj $loc`;
+            }
+        }
+    }
+}
+
+
+// Generate Locators on Selected Meshes with Proximity constraints
+global proc ddLocatorGenShapeConstrained()
+{    
+    //Dialog popup to get a value from the user
+    string $resultNumOfCurves = `promptDialog 
+    -title "Enter Number Locators" 
+    -message "Number of Locators:" 
+    -text "10"
+    -button "OK" 
+    -button "Cancel" 
+    -defaultButton "OK" 
+    -cancelButton "Cancel" 
+    -dismissString "Cancel"`;
+    
+    int $numCurves = 10;
+    
+    // Check if the user clicked OK
+    if ($resultNumOfCurves == "OK") 
+    {
+        // Get the entered value
+        string $enteredValue = `promptDialog -query -text`;
+
+        // Convert the string to a float
+        $numCurves = $enteredValue;
+        // Use the float value as needed
+        print("Used Number of Locators is: " + $enteredValue + "\n");
+    }
+    
+    
+    string $selection[] = `ls -sl`;
+    
+    if (size($selection) == 0) {
+        warning "Please select at least one polygon object.";
+    } else {
+        for ($index = 0; $index < size($selection); $index++) {
+            string $obj = $selection[$index];
+            string $shapeArray[] = `listRelatives -children -type "mesh" $obj`;
+            string $shape = "";
+            if (size($shapeArray) > 0) {
+                $shape = $shapeArray[0];
+            }
+            if (size($shapeArray) == 0) {
+                warning ($obj + " does not have a polygon shape.");
+                continue;
+            }
+            
+            float $bbox[] = `xform -q -ws -bb $obj`;
+            float $minX = $bbox[0], $minY = $bbox[1], $minZ = $bbox[2];
+            float $maxX = $bbox[3], $maxY = $bbox[4], $maxZ = $bbox[5];
+            
+            string $group = `group -em -name ($obj + "_locators")`;
+            
+            string $locators[];
+            for ($i = 0; $i < $numCurves; $i++) {
+                float $randX = rand($minX, $maxX);
+                float $randY = rand($minY, $maxY);
+                float $randZ = rand($minZ, $maxZ);
+                
+                string $locator[] = `spaceLocator -name ($group + "_locator_" + $i)`;
+                xform -worldSpace -translation $randX $randY $randZ $locator;
+                parent $locator[0] $group;
+                $locators[size($locators)] = $locator[0];
+            }
+            
+            for ($loc in $locators) {
+                setAttr ($loc + "Shape.localScaleX") 10;
+                setAttr ($loc + "Shape.localScaleY") 10;
+                setAttr ($loc + "Shape.localScaleZ") 10;
+                string $constraint[] = `geometryConstraint -weight 1 $obj $loc`;
+                delete $constraint;
+                select -cl;
+                select -r $obj;
+                select -add $loc;
+                ProximityPin;
+                toggleVisibilityAndKeepSelection `optionVar -query toggleVisibilityAndKeepSelectionBehaviour`;
+                //string $pConstraint[] = `parentConstraint -mo -weight 1 $obj $loc`;
+            }
+        }
+    }
+}
+
+
+// Generate Curves Between Selected Polygon Objects – select 2 Object and run the script 
+global proc ddCurvesBetweenMeshes()
+{    
+    //Dialog popup to get a value from the user
+    string $resultNumOfCurves = `promptDialog 
+    -title "Enter Number of Curves" 
+    -message "Number of Curves:" 
+    -text "10"
+    -button "OK" 
+    -button "Cancel" 
+    -defaultButton "OK" 
+    -cancelButton "Cancel" 
+    -dismissString "Cancel"`;
+    
+    int $numCurves = 10;
+    
+    // Check if the user clicked OK
+    if ($resultNumOfCurves == "OK") 
+    {
+        // Get the entered value
+        string $enteredValue = `promptDialog -query -text`;
+
+        // Convert the string to a float
+        $numCurves = $enteredValue;
+        // Use the float value as needed
+        print("Used Offset is: " + $enteredValue + "\n");
+    }
+    
+    
+    string $selection[] = `ls -sl`;
+    string $locGrpA[];
+    string $locGrpB[];
+    
+    if (size($selection) == 0) {
+        warning "Please select at least one polygon object.";
+    } else {
+        for ($index = 0; $index < size($selection); $index++) {
+            string $obj = $selection[$index];
+            string $shapeArray[] = `listRelatives -children -type "mesh" $obj`;
+            string $shape = "";
+            if (size($shapeArray) > 0) {
+                $shape = $shapeArray[0];
+            }
+            if (size($shapeArray) == 0) {
+                warning ($obj + " does not have a polygon shape.");
+                continue;
+            }
+            
+            float $bbox[] = `xform -q -ws -bb $obj`;
+            float $minX = $bbox[0], $minY = $bbox[1], $minZ = $bbox[2];
+            float $maxX = $bbox[3], $maxY = $bbox[4], $maxZ = $bbox[5];
+            
+            string $group = `group -em -name ($obj + "_locators")`;
+            
+            string $locators[];
+            for ($i = 0; $i < $numCurves; $i++) {
+                float $randX = rand($minX, $maxX);
+                float $randY = rand($minY, $maxY);
+                float $randZ = rand($minZ, $maxZ);
+                
+                string $locator[] = `spaceLocator -name ($group + "_locator_" + $i)`;
+                xform -worldSpace -translation $randX $randY $randZ $locator;
+                parent $locator[0] $group;
+                $locators[size($locators)] = $locator[0];
+            }
+            
+            for ($loc in $locators) {
+                setAttr ($loc + "Shape.localScaleX") 10;
+                setAttr ($loc + "Shape.localScaleY") 10;
+                setAttr ($loc + "Shape.localScaleZ") 10;
+                string $constraint[] = `geometryConstraint -weight 1 $obj $loc`;
+                delete $constraint;
+            }
+            
+            if ($index == 0) {
+                $locGrpA = $locators;
+            } else if ($index == 1) {
+                $locGrpB = $locators;
+            }
+        }
+    }
+    
+    select -r $locGrpA;
+    select -add $locGrpB;
+
+
+    //// curve generation from locators
+    {
+        //Dialog popup to get a value from the user
+        string $resultGravity = `promptDialog 
+        -title "Enter Gravity" 
+        -message "Gravity:" 
+        -text "0.1"
+        -button "OK" 
+        -button "Cancel" 
+        -defaultButton "OK" 
+        -cancelButton "Cancel" 
+        -dismissString "Cancel"`;
+        
+        float $gravity = 0.1;
+        
+        // Check if the user clicked OK
+        if ($resultGravity == "OK") 
+        {
+            // Get the entered value
+            string $enteredValue = `promptDialog -query -text`;
+
+            // Convert the string to a float
+            $gravity = $enteredValue;
+            // Use the float value as needed
+            print("Used Offset is: " + $enteredValue + "\n");
+        }
+        
+        
+        //Dialog popup to get a value from the user
+        string $resultRand = `promptDialog 
+        -title "Enter Randomization" 
+        -message "Randomization:" 
+        -text "0.5"
+        -button "OK" 
+        -button "Cancel" 
+        -defaultButton "OK" 
+        -cancelButton "Cancel" 
+        -dismissString "Cancel"`;
+        
+        float $randValue = 0.5;
+        
+        // Check if the user clicked OK
+        if ($resultRand == "OK") 
+        {
+            // Get the entered value
+            string $enteredValue = `promptDialog -query -text`;
+
+            // Convert the string to a float
+            $randValue = $enteredValue;
+            // Use the float value as needed
+            print("Used Offset is: " + $enteredValue + "\n");
+        }
+        
+        
+        // Get the selected locators
+        string $selectedLocators[] = `ls -sl`; // Select both groups of locators
+        
+        // Split the selected locators into two groups
+        int $numCurves = size($selectedLocators) / 2;
+        string $group1[];
+        string $group2[];
+        
+        // Manually slice the selected locators into two groups
+        for ($i = 0; $i < $numCurves; $i++) {
+            $group1[$i] = $selectedLocators[$i];
+            $group2[$i] = $selectedLocators[$i + $numCurves];
+        }
+        
+        // Check if the number of locators in each group is the same
+        if (size($group1) == size($group2)) {
+            string $curves[];
+            
+            // Create curves between corresponding locators
+            for ($i = 0; $i < size($group1); $i++) {
+                // Get the world positions of both locators in the pair
+                float $pos1[] = `xform -q -ws -t $group1[$i]`;
+                float $pos2[] = `xform -q -ws -t $group2[$i]`;
+                
+                // Create a curve between the two locators
+                string $curve = `curve -d 1 -p $pos1[0] $pos1[1] $pos1[2] -p $pos2[0] $pos2[1] $pos2[2]`;
+                
+                // Store the curve name in an array
+                $curves[$i] = $curve;
+            }
+            
+            // Resample all the curves with the given rebuild parameters
+            select $curves; // Select all the generated curves
+            performRebuildCurveSet 1 1 0 0.01 10 3 1 0 0 1 0 1 0.05; // Perform the rebuild
+
+            // Apply controlled bending logic to each rebuilt curve
+            for ($i = 0; $i < size($curves); $i++) {
+                string $curve = $curves[$i]; // Get the current curve name
+                
+                // Get the number of CVs (control vertices) of the curve
+                int $numCVs = `getAttr ($curve + ".spans")` + `getAttr ($curve + ".degree")`;
+                
+                // Get the start and end positions of the curve (first and last CV)
+                float $startPos[] = `pointPosition ($curve + ".cv[0]")`;  // Start position of the curve (first CV)
+                float $endPos[] = `pointPosition ($curve + ".cv[" + ($numCVs - 1) + "]")`; // End position of the curve (last CV)
+                
+                // Calculate the length of the curve (distance between start and end)
+                float $length = sqrt(pow(($endPos[0] - $startPos[0]), 2) + pow(($endPos[1] - $startPos[1]), 2) + pow(($endPos[2] - $startPos[2]), 2));
+                
+                // Maximum vertical offset as a fraction of the total length
+                float $maxBendFactor = $gravity;  // Maximum vertical offset percentage (adjust for more or less bending)
+                float $maxOffset = $length * $maxBendFactor;  // Maximum displacement based on the curve's length
+                
+                // Introduce randomization in the gravity (max offset variation)
+                //float $randValue = 0.5;
+                float $randMin = 1-$randValue;
+                float $randMax = 1+$randValue;
+                float $randomFactor = rand($randMin, $randMax);  // Randomization factor (randomize within 10% of the gravity value)
+                $maxOffset = $maxOffset * $randomFactor;  // Apply the randomization
+                
+                // Loop through each CV (except for the first and last ones)
+                for ($j = 1; $j < $numCVs - 1; $j++) {
+                    // Normalize t from 0 to 1 based on the CV index
+                    float $t = (float)$j / (float)($numCVs - 1);
+                    
+                    // Calculate the smooth parabolic vertical offset using a parabolic curve
+                    // Parabolic displacement: maxOffset * (1 - 4 * pow(t - 0.5, 2))
+                    float $offset = $maxOffset * (1 - 4 * pow($t - 0.5, 2)); // Parabolic shape
+                    
+                    // Get the current position of the CV in world space
+                    float $cvPos[] = `pointPosition ($curve + ".cv[" + $j + "]")`;
+                    
+                    // Convert the world position to local space using the curve's transformation
+                    float $localPos[] = `pointPosition -l ($curve + ".cv[" + $j + "]")`;
+                    
+                    // Apply the displacement in the Y direction (bend) in local space
+                    $localPos[1] = $localPos[1] - $offset; // Move CV downward by the offset
+                    
+                    // Convert the local space position back to world space and set it
+                    move -a $localPos[0] $localPos[1] $localPos[2] ($curve + ".cv[" + $j + "]");
+                }
+                
+                // Optionally, print the name of the smoothed curve
+                // print("Controlled bend applied to curve: " + $curve + "\n");
+            }
+            /*
+            string $grpSweep = `group -empty -name "sweep_GRP"`;
+            
+            // SweepMesh section
+            select $curves;
+            sweepMeshFromCurve -oneNodePerCurve 0;
+            string $sweepNode[] = `ls -sl`;
+            //print $sweepNode;
+            setAttr ($sweepNode[0] + ".scaleProfileX") 1;
+            setAttr ($sweepNode[0] + ".interpolationMode") 1;
+            setAttr ($sweepNode[0] + ".interpolationSteps") 40;
+            setAttr ($sweepNode[0] + ".createUVs") 1;
+            parent $curves $grpSweep;
+            */
+            //string $sweepObjects[] = `ls -sl`;
+            //string $grpSweep = `group -n "sweep_GPR" $sweepObjects`;
+            string $grpCrv = `group -n "curves_GRP" $curves`;
+            
+            
+        } else {
+            print("Error: The number of locators in each group must be the same.\n");
+        }
+
+    }
+}
+
+// Generate Curves Between Selected Polygon Objects – select 2 Object and run the script 
+global proc ddCurvesBetweenMeshesConstraints()
+{    
+    //Dialog popup to get a value from the user
+    string $resultNumOfCurves = `promptDialog 
+    -title "Enter Number of Curves" 
+    -message "Number of Curves:" 
+    -text "10"
+    -button "OK" 
+    -button "Cancel" 
+    -defaultButton "OK" 
+    -cancelButton "Cancel" 
+    -dismissString "Cancel"`;
+    
+    int $numCurves = 10;
+    
+    // Check if the user clicked OK
+    if ($resultNumOfCurves == "OK") 
+    {
+        // Get the entered value
+        string $enteredValue = `promptDialog -query -text`;
+
+        // Convert the string to a float
+        $numCurves = $enteredValue;
+        // Use the float value as needed
+        print("Used Offset is: " + $enteredValue + "\n");
+    }
+    
+    
+    string $selection[] = `ls -sl`;
+    string $locGrpA[];
+    string $locGrpB[];
+    
+    if (size($selection) == 0) {
+        warning "Please select at least one polygon object.";
+    } else {
+        for ($index = 0; $index < size($selection); $index++) {
+            string $obj = $selection[$index];
+            string $shapeArray[] = `listRelatives -children -type "mesh" $obj`;
+            string $shape = "";
+            if (size($shapeArray) > 0) {
+                $shape = $shapeArray[0];
+            }
+            if (size($shapeArray) == 0) {
+                warning ($obj + " does not have a polygon shape.");
+                continue;
+            }
+            
+            float $bbox[] = `xform -q -ws -bb $obj`;
+            float $minX = $bbox[0], $minY = $bbox[1], $minZ = $bbox[2];
+            float $maxX = $bbox[3], $maxY = $bbox[4], $maxZ = $bbox[5];
+            
+            string $group = `group -em -name ($obj + "_locators")`;
+            
+            string $locators[];
+            for ($i = 0; $i < $numCurves; $i++) {
+                float $randX = rand($minX, $maxX);
+                float $randY = rand($minY, $maxY);
+                float $randZ = rand($minZ, $maxZ);
+                
+                string $locator[] = `spaceLocator -name ($group + "_locator_" + $i)`;
+                xform -worldSpace -translation $randX $randY $randZ $locator;
+                parent $locator[0] $group;
+                $locators[size($locators)] = $locator[0];
+            }
+            
+            for ($loc in $locators) {
+                setAttr ($loc + "Shape.localScaleX") 10;
+                setAttr ($loc + "Shape.localScaleY") 10;
+                setAttr ($loc + "Shape.localScaleZ") 10;
+                string $constraint[] = `geometryConstraint -weight 1 $obj $loc`;
+                delete $constraint;
+                string $pConstraint[] = `parentConstraint -mo -weight 1 $obj $loc`;
+            }
+            
+            if ($index == 0) {
+                $locGrpA = $locators;
+            } else if ($index == 1) {
+                $locGrpB = $locators;
+            }
+        }
+    }
+    
+    select -r $locGrpA;
+    select -add $locGrpB;
+
+
+    //// curve generation from locators
+    {
+        //Dialog popup to get a value from the user
+        string $resultGravity = `promptDialog 
+        -title "Enter Gravity" 
+        -message "Gravity:" 
+        -text "0.1"
+        -button "OK" 
+        -button "Cancel" 
+        -defaultButton "OK" 
+        -cancelButton "Cancel" 
+        -dismissString "Cancel"`;
+        
+        float $gravity = 0.1;
+        
+        // Check if the user clicked OK
+        if ($resultGravity == "OK") 
+        {
+            // Get the entered value
+            string $enteredValue = `promptDialog -query -text`;
+
+            // Convert the string to a float
+            $gravity = $enteredValue;
+            // Use the float value as needed
+            print("Used Offset is: " + $enteredValue + "\n");
+        }
+        
+        
+        //Dialog popup to get a value from the user
+        string $resultRand = `promptDialog 
+        -title "Enter Randomization" 
+        -message "Randomization:" 
+        -text "0.5"
+        -button "OK" 
+        -button "Cancel" 
+        -defaultButton "OK" 
+        -cancelButton "Cancel" 
+        -dismissString "Cancel"`;
+        
+        float $randValue = 0.5;
+        
+        // Check if the user clicked OK
+        if ($resultRand == "OK") 
+        {
+            // Get the entered value
+            string $enteredValue = `promptDialog -query -text`;
+
+            // Convert the string to a float
+            $randValue = $enteredValue;
+            // Use the float value as needed
+            print("Used Offset is: " + $enteredValue + "\n");
+        }
+        
+        
+        // Get the selected locators
+        string $selectedLocators[] = `ls -sl`; // Select both groups of locators
+        
+        // Split the selected locators into two groups
+        int $numCurves = size($selectedLocators) / 2;
+        string $group1[];
+        string $group2[];
+
+        string $grpCluster = `group -empty -name "clusters_GPR"`;
+        
+        // Manually slice the selected locators into two groups
+        for ($i = 0; $i < $numCurves; $i++) {
+            $group1[$i] = $selectedLocators[$i];
+            $group2[$i] = $selectedLocators[$i + $numCurves];
+        }
+        
+        // Check if the number of locators in each group is the same
+        if (size($group1) == size($group2)) {
+            string $curves[];
+            
+            // Create curves between corresponding locators
+            for ($i = 0; $i < size($group1); $i++) {
+                // Get the world positions of both locators in the pair
+                float $pos1[] = `xform -q -ws -t $group1[$i]`;
+                float $pos2[] = `xform -q -ws -t $group2[$i]`;
+                
+                // Create a curve between the two locators
+                string $curve = `curve -d 1 -p $pos1[0] $pos1[1] $pos1[2] -p $pos2[0] $pos2[1] $pos2[2]`;
+                
+                // Store the curve name in an array
+                $curves[$i] = $curve;
+
+                //find number of CVs in curve
+                int $numCVs = `getAttr -size ($curve + ".controlPoints")`;
+                //loop for each CV
+                int $j = 0;
+                string $clusterNames[];
+                for ($j; $j < $numCVs; $j++)
+                {
+                    //make CV into a cluster
+                    string $clusId[] = `cluster -relative ($curve + ".cv[" + $j + "]")`;
+                    $clusterNames[$j] = `rename $clusId[1] ($curve + "_cluster")`;
+                }
+                
+                /*
+                print $group1[$i];
+                print "\n";
+                print $group2[$i];
+                print "\n";
+                */
+                parentConstraint -mo -weight 1 $group1[$i] $clusterNames[0];
+                parentConstraint -mo -weight 1 $group2[$i] $clusterNames[1];
+                parent $clusterNames[0] $grpCluster;
+                parent $clusterNames[1] $grpCluster;
+
+            }
+            
+            // Resample all the curves with the given rebuild parameters
+            select $curves; // Select all the generated curves
+            performRebuildCurveSet 1 1 0 0.01 10 3 1 0 0 1 0 1 0.05; // Perform the rebuild
+
+            // Apply controlled bending logic to each rebuilt curve
+            for ($i = 0; $i < size($curves); $i++) {
+                string $curve = $curves[$i]; // Get the current curve name
+                
+                // Get the number of CVs (control vertices) of the curve
+                int $numCVs = `getAttr ($curve + ".spans")` + `getAttr ($curve + ".degree")`;
+                
+                // Get the start and end positions of the curve (first and last CV)
+                float $startPos[] = `pointPosition ($curve + ".cv[0]")`;  // Start position of the curve (first CV)
+                float $endPos[] = `pointPosition ($curve + ".cv[" + ($numCVs - 1) + "]")`; // End position of the curve (last CV)
+                
+                // Calculate the length of the curve (distance between start and end)
+                float $length = sqrt(pow(($endPos[0] - $startPos[0]), 2) + pow(($endPos[1] - $startPos[1]), 2) + pow(($endPos[2] - $startPos[2]), 2));
+                
+                // Maximum vertical offset as a fraction of the total length
+                float $maxBendFactor = $gravity;  // Maximum vertical offset percentage (adjust for more or less bending)
+                float $maxOffset = $length * $maxBendFactor;  // Maximum displacement based on the curve's length
+                
+                // Introduce randomization in the gravity (max offset variation)
+                //float $randValue = 0.5;
+                float $randMin = 1-$randValue;
+                float $randMax = 1+$randValue;
+                float $randomFactor = rand($randMin, $randMax);  // Randomization factor (randomize within 10% of the gravity value)
+                $maxOffset = $maxOffset * $randomFactor;  // Apply the randomization
+                
+                // Loop through each CV (except for the first and last ones)
+                for ($j = 1; $j < $numCVs - 1; $j++) {
+                    // Normalize t from 0 to 1 based on the CV index
+                    float $t = (float)$j / (float)($numCVs - 1);
+                    
+                    // Calculate the smooth parabolic vertical offset using a parabolic curve
+                    // Parabolic displacement: maxOffset * (1 - 4 * pow(t - 0.5, 2))
+                    float $offset = $maxOffset * (1 - 4 * pow($t - 0.5, 2)); // Parabolic shape
+                    
+                    // Get the current position of the CV in world space
+                    float $cvPos[] = `pointPosition ($curve + ".cv[" + $j + "]")`;
+                    
+                    // Convert the world position to local space using the curve's transformation
+                    float $localPos[] = `pointPosition -l ($curve + ".cv[" + $j + "]")`;
+                    
+                    // Apply the displacement in the Y direction (bend) in local space
+                    $localPos[1] = $localPos[1] - $offset; // Move CV downward by the offset
+                    
+                    // Convert the local space position back to world space and set it
+                    move -a $localPos[0] $localPos[1] $localPos[2] ($curve + ".cv[" + $j + "]");
+                }
+                
+                // Optionally, print the name of the smoothed curve
+                // print("Controlled bend applied to curve: " + $curve + "\n");
+            }
+            /*
+            string $grpSweep = `group -empty -name "sweep_GRP"`;
+            
+            // SweepMesh section
+            select $curves;
+            sweepMeshFromCurve -oneNodePerCurve 0;
+            string $sweepNode[] = `ls -sl`;
+            //print $sweepNode;
+            setAttr ($sweepNode[0] + ".scaleProfileX") 1;
+            setAttr ($sweepNode[0] + ".interpolationMode") 1;
+            setAttr ($sweepNode[0] + ".interpolationSteps") 40;
+            setAttr ($sweepNode[0] + ".createUVs") 1;
+            parent $curves $grpSweep;
+            */
+            //string $sweepObjects[] = `ls -sl`;
+            //string $grpSweep = `group -n "sweep_GPR" $sweepObjects`;
+            string $grpCrv = `group -n "curves_GRP" $curves`;
+            
+            
+        } else {
+            print("Error: The number of locators in each group must be the same.\n");
+        }
+
+    }
+}
+
+
+// Curves 
+global proc ddGenCurvesBetweenLocators()
+{
+    //Dialog popup to get a value from the user
+    string $resultGravity = `promptDialog 
+    -title "Enter Gravity" 
+    -message "Gravity:" 
+    -text "0.1"
+    -button "OK" 
+    -button "Cancel" 
+    -defaultButton "OK" 
+    -cancelButton "Cancel" 
+    -dismissString "Cancel"`;
+    
+    float $gravity = 0.1;
+    
+    // Check if the user clicked OK
+    if ($resultGravity == "OK") 
+    {
+        // Get the entered value
+        string $enteredValue = `promptDialog -query -text`;
+
+        // Convert the string to a float
+        $gravity = $enteredValue;
+        // Use the float value as needed
+        print("Used Offset is: " + $enteredValue + "\n");
+    }
+    
+    
+    //Dialog popup to get a value from the user
+    string $resultRand = `promptDialog 
+    -title "Enter Randomization" 
+    -message "Randomization:" 
+    -text "0.5"
+    -button "OK" 
+    -button "Cancel" 
+    -defaultButton "OK" 
+    -cancelButton "Cancel" 
+    -dismissString "Cancel"`;
+    
+    float $randValue = 0.5;
+    
+    // Check if the user clicked OK
+    if ($resultRand == "OK") 
+    {
+        // Get the entered value
+        string $enteredValue = `promptDialog -query -text`;
+
+        // Convert the string to a float
+        $randValue = $enteredValue;
+        // Use the float value as needed
+        print("Used Offset is: " + $enteredValue + "\n");
+    }
+    
+    
+    // Get the selected locators
+    string $selectedLocators[] = `ls -sl`; // Select both groups of locators
+    
+    // Split the selected locators into two groups
+    int $numLocators = size($selectedLocators) / 2;
+    string $group1[];
+    string $group2[];
+    
+    // Manually slice the selected locators into two groups
+    for ($i = 0; $i < $numLocators; $i++) {
+        $group1[$i] = $selectedLocators[$i];
+        $group2[$i] = $selectedLocators[$i + $numLocators];
+    }
+    
+    // Check if the number of locators in each group is the same
+    if (size($group1) == size($group2)) {
+        string $curves[];
+        
+        // Create curves between corresponding locators
+        for ($i = 0; $i < size($group1); $i++) {
+            // Get the world positions of both locators in the pair
+            float $pos1[] = `xform -q -ws -t $group1[$i]`;
+            float $pos2[] = `xform -q -ws -t $group2[$i]`;
+            
+            // Create a curve between the two locators
+            string $curve = `curve -d 1 -p $pos1[0] $pos1[1] $pos1[2] -p $pos2[0] $pos2[1] $pos2[2]`;
+            
+            // Store the curve name in an array
+            $curves[$i] = $curve;
+        }
+        
+        // Resample all the curves with the given rebuild parameters
+        select $curves; // Select all the generated curves
+        performRebuildCurveSet 1 1 0 0.01 10 3 1 0 0 1 0 1 0.05; // Perform the rebuild
+
+        // Apply controlled bending logic to each rebuilt curve
+        for ($i = 0; $i < size($curves); $i++) {
+            string $curve = $curves[$i]; // Get the current curve name
+            
+            // Get the number of CVs (control vertices) of the curve
+            int $numCVs = `getAttr ($curve + ".spans")` + `getAttr ($curve + ".degree")`;
+            
+            // Get the start and end positions of the curve (first and last CV)
+            float $startPos[] = `pointPosition ($curve + ".cv[0]")`;  // Start position of the curve (first CV)
+            float $endPos[] = `pointPosition ($curve + ".cv[" + ($numCVs - 1) + "]")`; // End position of the curve (last CV)
+            
+            // Calculate the length of the curve (distance between start and end)
+            float $length = sqrt(pow(($endPos[0] - $startPos[0]), 2) + pow(($endPos[1] - $startPos[1]), 2) + pow(($endPos[2] - $startPos[2]), 2));
+            
+            // Maximum vertical offset as a fraction of the total length
+            float $maxBendFactor = $gravity;  // Maximum vertical offset percentage (adjust for more or less bending)
+            float $maxOffset = $length * $maxBendFactor;  // Maximum displacement based on the curve's length
+            
+            // Introduce randomization in the gravity (max offset variation)
+            //float $randValue = 0.5;
+            float $randMin = 1-$randValue;
+            float $randMax = 1+$randValue;
+            float $randomFactor = rand($randMin, $randMax);  // Randomization factor (randomize within 10% of the gravity value)
+            $maxOffset = $maxOffset * $randomFactor;  // Apply the randomization
+            
+            // Loop through each CV (except for the first and last ones)
+            for ($j = 1; $j < $numCVs - 1; $j++) {
+                // Normalize t from 0 to 1 based on the CV index
+                float $t = (float)$j / (float)($numCVs - 1);
+                
+                // Calculate the smooth parabolic vertical offset using a parabolic curve
+                // Parabolic displacement: maxOffset * (1 - 4 * pow(t - 0.5, 2))
+                float $offset = $maxOffset * (1 - 4 * pow($t - 0.5, 2)); // Parabolic shape
+                
+                // Get the current position of the CV in world space
+                float $cvPos[] = `pointPosition ($curve + ".cv[" + $j + "]")`;
+                
+                // Convert the world position to local space using the curve's transformation
+                float $localPos[] = `pointPosition -l ($curve + ".cv[" + $j + "]")`;
+                
+                // Apply the displacement in the Y direction (bend) in local space
+                $localPos[1] = $localPos[1] - $offset; // Move CV downward by the offset
+                
+                // Convert the local space position back to world space and set it
+                move -a $localPos[0] $localPos[1] $localPos[2] ($curve + ".cv[" + $j + "]");
+            }
+            
+            // Optionally, print the name of the smoothed curve
+            print("Controlled bend applied to curve: " + $curve + "\n");
+        }
+        
+        string $grpCrv = `group -n "curves_GRP" $curves`;
+        
+    } else {
+        print("Error: The number of locators in each group must be the same.\n");
+    }
+
+}
+
+
+global proc ddGenCurvesBetweenLocatorsConstrained()
+{
+    //Dialog popup to get a value from the user
+    string $resultGravity = `promptDialog 
+    -title "Enter Gravity" 
+    -message "Gravity:" 
+    -text "0.1"
+    -button "OK" 
+    -button "Cancel" 
+    -defaultButton "OK" 
+    -cancelButton "Cancel" 
+    -dismissString "Cancel"`;
+    
+    float $gravity = 0.1;
+    
+    // Check if the user clicked OK
+    if ($resultGravity == "OK") 
+    {
+        // Get the entered value
+        string $enteredValue = `promptDialog -query -text`;
+
+        // Convert the string to a float
+        $gravity = $enteredValue;
+        // Use the float value as needed
+        print("Used Offset is: " + $enteredValue + "\n");
+    }
+    
+    
+    //Dialog popup to get a value from the user
+    string $resultRand = `promptDialog 
+    -title "Enter Randomization" 
+    -message "Randomization:" 
+    -text "0.5"
+    -button "OK" 
+    -button "Cancel" 
+    -defaultButton "OK" 
+    -cancelButton "Cancel" 
+    -dismissString "Cancel"`;
+    
+    float $randValue = 0.5;
+    
+    // Check if the user clicked OK
+    if ($resultRand == "OK") 
+    {
+        // Get the entered value
+        string $enteredValue = `promptDialog -query -text`;
+
+        // Convert the string to a float
+        $randValue = $enteredValue;
+        // Use the float value as needed
+        print("Used Offset is: " + $enteredValue + "\n");
+    }
+    
+    
+    // Get the selected locators
+    string $selectedLocators[] = `ls -sl`; // Select both groups of locators
+    
+    // Split the selected locators into two groups
+    int $numLocators = size($selectedLocators) / 2;
+    string $group1[];
+    string $group2[];
+
+    string $grpCluster = `group -empty -name "clusters_GPR"`;
+    
+    // Manually slice the selected locators into two groups
+    for ($i = 0; $i < $numLocators; $i++) {
+        $group1[$i] = $selectedLocators[$i];
+        $group2[$i] = $selectedLocators[$i + $numLocators];
+    }
+    
+    // Check if the number of locators in each group is the same
+    if (size($group1) == size($group2)) {
+        string $curves[];
+        
+        // Create curves between corresponding locators
+        for ($i = 0; $i < size($group1); $i++) 
+        {
+            // Get the world positions of both locators in the pair
+            float $pos1[] = `xform -q -ws -t $group1[$i]`;
+            float $pos2[] = `xform -q -ws -t $group2[$i]`;
+            
+            // Create a curve between the two locators
+            string $curve = `curve -d 1 -p $pos1[0] $pos1[1] $pos1[2] -p $pos2[0] $pos2[1] $pos2[2]`;
+            
+            // Store the curve name in an array
+            $curves[$i] = $curve;
+            //string $curveShape[] = `listRelatives -shapes -type "nurbsCurve" $curve`;
+            //print $curveShape;
+            
+            //find number of CVs in curve
+            int $numCVs = `getAttr -size ($curve + ".controlPoints")`;
+            //loop for each CV
+            int $j = 0;
+            string $clusterNames[];
+            for ($j; $j < $numCVs; $j++)
+            {
+                //make CV into a cluster
+                string $clusId[] = `cluster -relative ($curve + ".cv[" + $j + "]")`;
+                $clusterNames[$j] = `rename $clusId[1] ($curve + "_cluster")`;
+            }
+            
+            /*
+            print $group1[$i];
+            print "\n";
+            print $group2[$i];
+            print "\n";
+            */
+            parentConstraint -mo -weight 1 $group1[$i] $clusterNames[0];
+            parentConstraint -mo -weight 1 $group2[$i] $clusterNames[1];
+            parent $clusterNames[0] $grpCluster;
+            parent $clusterNames[1] $grpCluster;
+            
+        }
+        
+        // Resample all the curves with the given rebuild parameters
+        select $curves; // Select all the generated curves
+        performRebuildCurveSet 1 1 0 0.01 10 3 1 0 0 1 0 1 0.05; // Perform the rebuild
+
+        // Apply controlled bending logic to each rebuilt curve
+        for ($i = 0; $i < size($curves); $i++) {
+            string $curve = $curves[$i]; // Get the current curve name
+            
+            // Get the number of CVs (control vertices) of the curve
+            int $numCVs = `getAttr ($curve + ".spans")` + `getAttr ($curve + ".degree")`;
+            
+            // Get the start and end positions of the curve (first and last CV)
+            float $startPos[] = `pointPosition ($curve + ".cv[0]")`;  // Start position of the curve (first CV)
+            float $endPos[] = `pointPosition ($curve + ".cv[" + ($numCVs - 1) + "]")`; // End position of the curve (last CV)
+            
+            // Calculate the length of the curve (distance between start and end)
+            float $length = sqrt(pow(($endPos[0] - $startPos[0]), 2) + pow(($endPos[1] - $startPos[1]), 2) + pow(($endPos[2] - $startPos[2]), 2));
+            
+            // Maximum vertical offset as a fraction of the total length
+            float $maxBendFactor = $gravity;  // Maximum vertical offset percentage (adjust for more or less bending)
+            float $maxOffset = $length * $maxBendFactor;  // Maximum displacement based on the curve's length
+            
+            // Introduce randomization in the gravity (max offset variation)
+            //float $randValue = 0.5;
+            float $randMin = 1-$randValue;
+            float $randMax = 1+$randValue;
+            float $randomFactor = rand($randMin, $randMax);  // Randomization factor (randomize within 10% of the gravity value)
+            $maxOffset = $maxOffset * $randomFactor;  // Apply the randomization
+            
+            // Loop through each CV (except for the first and last ones)
+            for ($j = 1; $j < $numCVs - 1; $j++) {
+                // Normalize t from 0 to 1 based on the CV index
+                float $t = (float)$j / (float)($numCVs - 1);
+                
+                // Calculate the smooth parabolic vertical offset using a parabolic curve
+                // Parabolic displacement: maxOffset * (1 - 4 * pow(t - 0.5, 2))
+                float $offset = $maxOffset * (1 - 4 * pow($t - 0.5, 2)); // Parabolic shape
+                
+                // Get the current position of the CV in world space
+                float $cvPos[] = `pointPosition ($curve + ".cv[" + $j + "]")`;
+                
+                // Convert the world position to local space using the curve's transformation
+                float $localPos[] = `pointPosition -l ($curve + ".cv[" + $j + "]")`;
+                
+                // Apply the displacement in the Y direction (bend) in local space
+                $localPos[1] = $localPos[1] - $offset; // Move CV downward by the offset
+                
+                // Convert the local space position back to world space and set it
+                move -a $localPos[0] $localPos[1] $localPos[2] ($curve + ".cv[" + $j + "]");
+            }
+            
+            // Optionally, print the name of the smoothed curve
+            print("Controlled bend applied to curve: " + $curve + "\n");
+        }
+        
+        string $grpCrv = `group -n "curves_GRP" $curves`;
+        
+    } else {
+        print("Error: The number of locators in each group must be the same.\n");
+    }
+
+}
+
+// Cable Generation Between Locators Single Sweep
+global proc ddGenCablesBetweenLocatorsSingleSweep()
+{
+    //Dialog popup to get a value from the user
+    string $resultGravity = `promptDialog 
+    -title "Enter Gravity" 
+    -message "Gravity:" 
+    -text "0.1"
+    -button "OK" 
+    -button "Cancel" 
+    -defaultButton "OK" 
+    -cancelButton "Cancel" 
+    -dismissString "Cancel"`;
+    
+    float $gravity = 0.1;
+    
+    // Check if the user clicked OK
+    if ($resultGravity == "OK") 
+    {
+        // Get the entered value
+        string $enteredValue = `promptDialog -query -text`;
+
+        // Convert the string to a float
+        $gravity = $enteredValue;
+        // Use the float value as needed
+        print("Used Offset is: " + $enteredValue + "\n");
+    }
+    
+    
+    //Dialog popup to get a value from the user
+    string $resultRand = `promptDialog 
+    -title "Enter Randomization" 
+    -message "Randomization:" 
+    -text "0.5"
+    -button "OK" 
+    -button "Cancel" 
+    -defaultButton "OK" 
+    -cancelButton "Cancel" 
+    -dismissString "Cancel"`;
+    
+    float $randValue = 0.5;
+    
+    // Check if the user clicked OK
+    if ($resultRand == "OK") 
+    {
+        // Get the entered value
+        string $enteredValue = `promptDialog -query -text`;
+
+        // Convert the string to a float
+        $randValue = $enteredValue;
+        // Use the float value as needed
+        print("Used Offset is: " + $enteredValue + "\n");
+    }
+    
+    
+    // Get the selected locators
+    string $selectedLocators[] = `ls -sl`; // Select both groups of locators
+    
+    // Split the selected locators into two groups
+    int $numLocators = size($selectedLocators) / 2;
+    string $group1[];
+    string $group2[];
+    
+    // Manually slice the selected locators into two groups
+    for ($i = 0; $i < $numLocators; $i++) {
+        $group1[$i] = $selectedLocators[$i];
+        $group2[$i] = $selectedLocators[$i + $numLocators];
+    }
+    
+    // Check if the number of locators in each group is the same
+    if (size($group1) == size($group2)) {
+        string $curves[];
+        
+        // Create curves between corresponding locators
+        for ($i = 0; $i < size($group1); $i++) {
+            // Get the world positions of both locators in the pair
+            float $pos1[] = `xform -q -ws -t $group1[$i]`;
+            float $pos2[] = `xform -q -ws -t $group2[$i]`;
+            
+            // Create a curve between the two locators
+            string $curve = `curve -d 1 -p $pos1[0] $pos1[1] $pos1[2] -p $pos2[0] $pos2[1] $pos2[2]`;
+            
+            // Store the curve name in an array
+            $curves[$i] = $curve;
+        }
+        
+        // Resample all the curves with the given rebuild parameters
+        select $curves; // Select all the generated curves
+        performRebuildCurveSet 1 1 0 0.01 10 3 1 0 0 1 0 1 0.05; // Perform the rebuild
+
+        // Apply controlled bending logic to each rebuilt curve
+        for ($i = 0; $i < size($curves); $i++) {
+            string $curve = $curves[$i]; // Get the current curve name
+            
+            // Get the number of CVs (control vertices) of the curve
+            int $numCVs = `getAttr ($curve + ".spans")` + `getAttr ($curve + ".degree")`;
+            
+            // Get the start and end positions of the curve (first and last CV)
+            float $startPos[] = `pointPosition ($curve + ".cv[0]")`;  // Start position of the curve (first CV)
+            float $endPos[] = `pointPosition ($curve + ".cv[" + ($numCVs - 1) + "]")`; // End position of the curve (last CV)
+            
+            // Calculate the length of the curve (distance between start and end)
+            float $length = sqrt(pow(($endPos[0] - $startPos[0]), 2) + pow(($endPos[1] - $startPos[1]), 2) + pow(($endPos[2] - $startPos[2]), 2));
+            
+            // Maximum vertical offset as a fraction of the total length
+            float $maxBendFactor = $gravity;  // Maximum vertical offset percentage (adjust for more or less bending)
+            float $maxOffset = $length * $maxBendFactor;  // Maximum displacement based on the curve's length
+            
+            // Introduce randomization in the gravity (max offset variation)
+            //float $randValue = 0.5;
+            float $randMin = 1-$randValue;
+            float $randMax = 1+$randValue;
+            float $randomFactor = rand($randMin, $randMax);  // Randomization factor (randomize within 10% of the gravity value)
+            $maxOffset = $maxOffset * $randomFactor;  // Apply the randomization
+            
+            // Loop through each CV (except for the first and last ones)
+            for ($j = 1; $j < $numCVs - 1; $j++) {
+                // Normalize t from 0 to 1 based on the CV index
+                float $t = (float)$j / (float)($numCVs - 1);
+                
+                // Calculate the smooth parabolic vertical offset using a parabolic curve
+                // Parabolic displacement: maxOffset * (1 - 4 * pow(t - 0.5, 2))
+                float $offset = $maxOffset * (1 - 4 * pow($t - 0.5, 2)); // Parabolic shape
+                
+                // Get the current position of the CV in world space
+                float $cvPos[] = `pointPosition ($curve + ".cv[" + $j + "]")`;
+                
+                // Convert the world position to local space using the curve's transformation
+                float $localPos[] = `pointPosition -l ($curve + ".cv[" + $j + "]")`;
+                
+                // Apply the displacement in the Y direction (bend) in local space
+                $localPos[1] = $localPos[1] - $offset; // Move CV downward by the offset
+                
+                // Convert the local space position back to world space and set it
+                move -a $localPos[0] $localPos[1] $localPos[2] ($curve + ".cv[" + $j + "]");
+            }
+            
+            // Optionally, print the name of the smoothed curve
+            print("Controlled bend applied to curve: " + $curve + "\n");
+        }
+        
+        string $grpSweep = `group -empty -name "sweep_GRP"`;
+            
+        // SweepMesh section
+        select $curves;
+        sweepMeshFromCurve -oneNodePerCurve 0;
+        string $sweepNode[] = `ls -sl`;
+        //print $sweepNode;
+        setAttr ($sweepNode[0] + ".scaleProfileX") 1;
+        setAttr ($sweepNode[0] + ".interpolationMode") 1;
+        setAttr ($sweepNode[0] + ".interpolationSteps") 40;
+        setAttr ($sweepNode[0] + ".createUVs") 1;
+        string $sweepObject[] = `listConnections $sweepNode[0]`;
+
+        int $size = size($sweepObject);
+        int $halfIndex = $size / 2;
+        
+        string $newTransforms[];
+        int $j = 0;
+        
+        // Loop through the second half
+        for ($i = $halfIndex; $i < $size; $i++) 
+        {
+            $newTransforms[$j] = $sweepObject[$i];
+            $j++;
+        }
+
+        parent $newTransforms $grpSweep;
+        
+        //string $sweepObjects[] = `ls -sl`;
+        //string $grpSweep = `group -n "sweep_GPR" $sweepObjects`;
+        string $grpCrv = `group -n "curves_GRP" $curves`;
+        
+        
+    } else {
+        print("Error: The number of locators in each group must be the same.\n");
+    }
+
+}
+
+// Cable Generation Between Locators Multi Sweep
+global proc ddGenCablesBetweenLocatorsMultiSweep()
+{
+    //Dialog popup to get a value from the user
+    string $resultGravity = `promptDialog 
+    -title "Enter Gravity" 
+    -message "Gravity:" 
+    -text "0.1"
+    -button "OK" 
+    -button "Cancel" 
+    -defaultButton "OK" 
+    -cancelButton "Cancel" 
+    -dismissString "Cancel"`;
+    
+    float $gravity = 0.1;
+    
+    // Check if the user clicked OK
+    if ($resultGravity == "OK") 
+    {
+        // Get the entered value
+        string $enteredValue = `promptDialog -query -text`;
+
+        // Convert the string to a float
+        $gravity = $enteredValue;
+        // Use the float value as needed
+        print("Used Offset is: " + $enteredValue + "\n");
+    }
+    
+    
+    //Dialog popup to get a value from the user
+    string $resultRand = `promptDialog 
+    -title "Enter Randomization" 
+    -message "Randomization:" 
+    -text "0.5"
+    -button "OK" 
+    -button "Cancel" 
+    -defaultButton "OK" 
+    -cancelButton "Cancel" 
+    -dismissString "Cancel"`;
+    
+    float $randValue = 0.5;
+    
+    // Check if the user clicked OK
+    if ($resultRand == "OK") 
+    {
+        // Get the entered value
+        string $enteredValue = `promptDialog -query -text`;
+
+        // Convert the string to a float
+        $randValue = $enteredValue;
+        // Use the float value as needed
+        print("Used Offset is: " + $enteredValue + "\n");
+    }
+    
+    
+    // Get the selected locators
+    string $selectedLocators[] = `ls -sl`; // Select both groups of locators
+    
+    // Split the selected locators into two groups
+    int $numLocators = size($selectedLocators) / 2;
+    string $group1[];
+    string $group2[];
+    
+    // Manually slice the selected locators into two groups
+    for ($i = 0; $i < $numLocators; $i++) {
+        $group1[$i] = $selectedLocators[$i];
+        $group2[$i] = $selectedLocators[$i + $numLocators];
+    }
+    
+    // Check if the number of locators in each group is the same
+    if (size($group1) == size($group2)) {
+        string $curves[];
+        
+        // Create curves between corresponding locators
+        for ($i = 0; $i < size($group1); $i++) {
+            // Get the world positions of both locators in the pair
+            float $pos1[] = `xform -q -ws -t $group1[$i]`;
+            float $pos2[] = `xform -q -ws -t $group2[$i]`;
+            
+            // Create a curve between the two locators
+            string $curve = `curve -d 1 -p $pos1[0] $pos1[1] $pos1[2] -p $pos2[0] $pos2[1] $pos2[2]`;
+            
+            // Store the curve name in an array
+            $curves[$i] = $curve;
+        }
+        
+        // Resample all the curves with the given rebuild parameters
+        select $curves; // Select all the generated curves
+        performRebuildCurveSet 1 1 0 0.01 10 3 1 0 0 1 0 1 0.05; // Perform the rebuild
+
+        // Apply controlled bending logic to each rebuilt curve
+        for ($i = 0; $i < size($curves); $i++) {
+            string $curve = $curves[$i]; // Get the current curve name
+            
+            // Get the number of CVs (control vertices) of the curve
+            int $numCVs = `getAttr ($curve + ".spans")` + `getAttr ($curve + ".degree")`;
+            
+            // Get the start and end positions of the curve (first and last CV)
+            float $startPos[] = `pointPosition ($curve + ".cv[0]")`;  // Start position of the curve (first CV)
+            float $endPos[] = `pointPosition ($curve + ".cv[" + ($numCVs - 1) + "]")`; // End position of the curve (last CV)
+            
+            // Calculate the length of the curve (distance between start and end)
+            float $length = sqrt(pow(($endPos[0] - $startPos[0]), 2) + pow(($endPos[1] - $startPos[1]), 2) + pow(($endPos[2] - $startPos[2]), 2));
+            
+            // Maximum vertical offset as a fraction of the total length
+            float $maxBendFactor = $gravity;  // Maximum vertical offset percentage (adjust for more or less bending)
+            float $maxOffset = $length * $maxBendFactor;  // Maximum displacement based on the curve's length
+            
+            // Introduce randomization in the gravity (max offset variation)
+            //float $randValue = 0.5;
+            float $randMin = 1-$randValue;
+            float $randMax = 1+$randValue;
+            float $randomFactor = rand($randMin, $randMax);  // Randomization factor (randomize within 10% of the gravity value)
+            $maxOffset = $maxOffset * $randomFactor;  // Apply the randomization
+            
+            // Loop through each CV (except for the first and last ones)
+            for ($j = 1; $j < $numCVs - 1; $j++) {
+                // Normalize t from 0 to 1 based on the CV index
+                float $t = (float)$j / (float)($numCVs - 1);
+                
+                // Calculate the smooth parabolic vertical offset using a parabolic curve
+                // Parabolic displacement: maxOffset * (1 - 4 * pow(t - 0.5, 2))
+                float $offset = $maxOffset * (1 - 4 * pow($t - 0.5, 2)); // Parabolic shape
+                
+                // Get the current position of the CV in world space
+                float $cvPos[] = `pointPosition ($curve + ".cv[" + $j + "]")`;
+                
+                // Convert the world position to local space using the curve's transformation
+                float $localPos[] = `pointPosition -l ($curve + ".cv[" + $j + "]")`;
+                
+                // Apply the displacement in the Y direction (bend) in local space
+                $localPos[1] = $localPos[1] - $offset; // Move CV downward by the offset
+                
+                // Convert the local space position back to world space and set it
+                move -a $localPos[0] $localPos[1] $localPos[2] ($curve + ".cv[" + $j + "]");
+            }
+            
+            // Optionally, print the name of the smoothed curve
+            print("Controlled bend applied to curve: " + $curve + "\n");
+        }
+        
+        string $grpSweep = `group -empty -name "sweep_GPR"`;
+            
+        // SweepMesh section
+        for ($curveObj in $curves)
+        {
+            select $curveObj;
+            sweepMeshFromCurve -oneNodePerCurve 1;
+            string $sweepNode[] = `ls -sl`;
+            //print $sweepNode;
+            setAttr ($sweepNode[0] + ".scaleProfileX") 1;
+            setAttr ($sweepNode[0] + ".interpolationMode") 1;
+            setAttr ($sweepNode[0] + ".interpolationSteps") 40;
+            setAttr ($sweepNode[0] + ".createUVs") 1;
+            setAttr ($sweepNode[0] + ".scaleProfileX") (rand(0.2,3));
+            string $sweepObject[] = `listConnections $sweepNode[0]`;
+            parent $sweepObject[1] $grpSweep;
+        }
+        
+        //string $sweepObjects[] = `ls -sl`;
+        //string $grpSweep = `group -n "sweep_GPR" $sweepObjects`;
+        string $grpCrv = `group -n "curves_GPR" $curves`;
+        
+        
+    } else {
+        print("Error: The number of locators in each group must be the same.\n");
+    }
+
+}
+
+// Generate Cables Between Selected Polygon Objects Single Sweep – select 2 Object and run the script
+global proc ddCablesBetweenMeshesSingleSweep()
+{    
+    //Dialog popup to get a value from the user
+    string $resultNumOfCurves = `promptDialog 
+    -title "Enter Number of Curves" 
+    -message "Number of Curves:" 
+    -text "10"
+    -button "OK" 
+    -button "Cancel" 
+    -defaultButton "OK" 
+    -cancelButton "Cancel" 
+    -dismissString "Cancel"`;
+    
+    int $numCurves = 10;
+    
+    // Check if the user clicked OK
+    if ($resultNumOfCurves == "OK") 
+    {
+        // Get the entered value
+        string $enteredValue = `promptDialog -query -text`;
+
+        // Convert the string to a float
+        $numCurves = $enteredValue;
+        // Use the float value as needed
+        print("Used Number of Curves is: " + $enteredValue + "\n");
+    }
+    
+    
+    string $selection[] = `ls -sl`;
+    string $locGrpA[];
+    string $locGrpB[];
+    
+    if (size($selection) == 0) {
+        warning "Please select at least one polygon object.";
+    } else {
+        for ($index = 0; $index < size($selection); $index++) {
+            string $obj = $selection[$index];
+            string $shapeArray[] = `listRelatives -children -type "mesh" $obj`;
+            string $shape = "";
+            if (size($shapeArray) > 0) {
+                $shape = $shapeArray[0];
+            }
+            if (size($shapeArray) == 0) {
+                warning ($obj + " does not have a polygon shape.");
+                continue;
+            }
+            
+            float $bbox[] = `xform -q -ws -bb $obj`;
+            float $minX = $bbox[0], $minY = $bbox[1], $minZ = $bbox[2];
+            float $maxX = $bbox[3], $maxY = $bbox[4], $maxZ = $bbox[5];
+            
+            string $group = `group -em -name ($obj + "_locators")`;
+            
+            string $locators[];
+            for ($i = 0; $i < $numCurves; $i++) {
+                float $randX = rand($minX, $maxX);
+                float $randY = rand($minY, $maxY);
+                float $randZ = rand($minZ, $maxZ);
+                
+                string $locator[] = `spaceLocator -name ($group + "_locator_" + $i)`;
+                xform -worldSpace -translation $randX $randY $randZ $locator;
+                parent $locator[0] $group;
+                $locators[size($locators)] = $locator[0];
+            }
+            
+            for ($loc in $locators) {
+                setAttr ($loc + "Shape.localScaleX") 10;
+                setAttr ($loc + "Shape.localScaleY") 10;
+                setAttr ($loc + "Shape.localScaleZ") 10;
+                string $constraint[] = `geometryConstraint -weight 1 $obj $loc`;
+                delete $constraint;
+            }
+            
+            if ($index == 0) {
+                $locGrpA = $locators;
+            } else if ($index == 1) {
+                $locGrpB = $locators;
+            }
+        }
+    }
+    
+    select -r $locGrpA;
+    select -add $locGrpB;
+
+
+    //// curve generation from locators
+    {
+        //Dialog popup to get a value from the user
+        string $resultGravity = `promptDialog 
+        -title "Enter Gravity" 
+        -message "Gravity:" 
+        -text "0.1"
+        -button "OK" 
+        -button "Cancel" 
+        -defaultButton "OK" 
+        -cancelButton "Cancel" 
+        -dismissString "Cancel"`;
+        
+        float $gravity = 0.1;
+        
+        // Check if the user clicked OK
+        if ($resultGravity == "OK") 
+        {
+            // Get the entered value
+            string $enteredValue = `promptDialog -query -text`;
+
+            // Convert the string to a float
+            $gravity = $enteredValue;
+            // Use the float value as needed
+            print("Used Offset is: " + $enteredValue + "\n");
+        }
+        
+        
+        //Dialog popup to get a value from the user
+        string $resultRand = `promptDialog 
+        -title "Enter Randomization" 
+        -message "Randomization:" 
+        -text "0.5"
+        -button "OK" 
+        -button "Cancel" 
+        -defaultButton "OK" 
+        -cancelButton "Cancel" 
+        -dismissString "Cancel"`;
+        
+        float $randValue = 0.5;
+        
+        // Check if the user clicked OK
+        if ($resultRand == "OK") 
+        {
+            // Get the entered value
+            string $enteredValue = `promptDialog -query -text`;
+
+            // Convert the string to a float
+            $randValue = $enteredValue;
+            // Use the float value as needed
+            print("Used Offset is: " + $enteredValue + "\n");
+        }
+        
+        
+        // Get the selected locators
+        string $selectedLocators[] = `ls -sl`; // Select both groups of locators
+        
+        // Split the selected locators into two groups
+        int $numCurves = size($selectedLocators) / 2;
+        string $group1[];
+        string $group2[];
+        
+        // Manually slice the selected locators into two groups
+        for ($i = 0; $i < $numCurves; $i++) {
+            $group1[$i] = $selectedLocators[$i];
+            $group2[$i] = $selectedLocators[$i + $numCurves];
+        }
+        
+        // Check if the number of locators in each group is the same
+        if (size($group1) == size($group2)) {
+            string $curves[];
+            
+            // Create curves between corresponding locators
+            for ($i = 0; $i < size($group1); $i++) {
+                // Get the world positions of both locators in the pair
+                float $pos1[] = `xform -q -ws -t $group1[$i]`;
+                float $pos2[] = `xform -q -ws -t $group2[$i]`;
+                
+                // Create a curve between the two locators
+                string $curve = `curve -d 1 -p $pos1[0] $pos1[1] $pos1[2] -p $pos2[0] $pos2[1] $pos2[2]`;
+                
+                // Store the curve name in an array
+                $curves[$i] = $curve;
+            }
+            
+            // Resample all the curves with the given rebuild parameters
+            select $curves; // Select all the generated curves
+            performRebuildCurveSet 1 1 0 0.01 10 3 1 0 0 1 0 1 0.05; // Perform the rebuild
+
+            // Apply controlled bending logic to each rebuilt curve
+            for ($i = 0; $i < size($curves); $i++) {
+                string $curve = $curves[$i]; // Get the current curve name
+                
+                // Get the number of CVs (control vertices) of the curve
+                int $numCVs = `getAttr ($curve + ".spans")` + `getAttr ($curve + ".degree")`;
+                
+                // Get the start and end positions of the curve (first and last CV)
+                float $startPos[] = `pointPosition ($curve + ".cv[0]")`;  // Start position of the curve (first CV)
+                float $endPos[] = `pointPosition ($curve + ".cv[" + ($numCVs - 1) + "]")`; // End position of the curve (last CV)
+                
+                // Calculate the length of the curve (distance between start and end)
+                float $length = sqrt(pow(($endPos[0] - $startPos[0]), 2) + pow(($endPos[1] - $startPos[1]), 2) + pow(($endPos[2] - $startPos[2]), 2));
+                
+                // Maximum vertical offset as a fraction of the total length
+                float $maxBendFactor = $gravity;  // Maximum vertical offset percentage (adjust for more or less bending)
+                float $maxOffset = $length * $maxBendFactor;  // Maximum displacement based on the curve's length
+                
+                // Introduce randomization in the gravity (max offset variation)
+                //float $randValue = 0.5;
+                float $randMin = 1-$randValue;
+                float $randMax = 1+$randValue;
+                float $randomFactor = rand($randMin, $randMax);  // Randomization factor (randomize within 10% of the gravity value)
+                $maxOffset = $maxOffset * $randomFactor;  // Apply the randomization
+                
+                // Loop through each CV (except for the first and last ones)
+                for ($j = 1; $j < $numCVs - 1; $j++) {
+                    // Normalize t from 0 to 1 based on the CV index
+                    float $t = (float)$j / (float)($numCVs - 1);
+                    
+                    // Calculate the smooth parabolic vertical offset using a parabolic curve
+                    // Parabolic displacement: maxOffset * (1 - 4 * pow(t - 0.5, 2))
+                    float $offset = $maxOffset * (1 - 4 * pow($t - 0.5, 2)); // Parabolic shape
+                    
+                    // Get the current position of the CV in world space
+                    float $cvPos[] = `pointPosition ($curve + ".cv[" + $j + "]")`;
+                    
+                    // Convert the world position to local space using the curve's transformation
+                    float $localPos[] = `pointPosition -l ($curve + ".cv[" + $j + "]")`;
+                    
+                    // Apply the displacement in the Y direction (bend) in local space
+                    $localPos[1] = $localPos[1] - $offset; // Move CV downward by the offset
+                    
+                    // Convert the local space position back to world space and set it
+                    move -a $localPos[0] $localPos[1] $localPos[2] ($curve + ".cv[" + $j + "]");
+                }
+                
+                // Optionally, print the name of the smoothed curve
+                // print("Controlled bend applied to curve: " + $curve + "\n");
+            }
+            
+            string $grpSweep = `group -empty -name "sweep_GRP"`;
+            
+            // SweepMesh section
+            select $curves;
+            sweepMeshFromCurve -oneNodePerCurve 0;
+            string $sweepNode[] = `ls -sl`;
+            //print $sweepNode;
+            setAttr ($sweepNode[0] + ".scaleProfileX") 1;
+            setAttr ($sweepNode[0] + ".interpolationMode") 1;
+            setAttr ($sweepNode[0] + ".interpolationSteps") 40;
+            setAttr ($sweepNode[0] + ".createUVs") 1;
+            string $sweepObject[] = `listConnections $sweepNode[0]`;
+
+            int $size = size($sweepObject);
+            int $halfIndex = $size / 2;
+            
+            string $newTransforms[];
+            int $j = 0;
+            
+            // Loop through the second half
+            for ($i = $halfIndex; $i < $size; $i++) 
+            {
+                $newTransforms[$j] = $sweepObject[$i];
+                $j++;
+            }
+
+            parent $newTransforms $grpSweep;
+            
+            //string $sweepObjects[] = `ls -sl`;
+            //string $grpSweep = `group -n "sweep_GPR" $sweepObjects`;
+            string $grpCrv = `group -n "curves_GRP" $curves`;
+            
+            
+        } else {
+            print("Error: The number of locators in each group must be the same.\n");
+        }
+
+    }
+}
+
+// Generate Cables Between Selected Polygon Objects Multi Sweep – select 2 Object and run the script
+global proc ddCablesBetweenMeshesMultiSweep()
+{    
+    //Dialog popup to get a value from the user
+    string $resultNumOfCurves = `promptDialog 
+    -title "Enter Number of Curves" 
+    -message "Number of Curves:" 
+    -text "10"
+    -button "OK" 
+    -button "Cancel" 
+    -defaultButton "OK" 
+    -cancelButton "Cancel" 
+    -dismissString "Cancel"`;
+    
+    int $numCurves = 10;
+    
+    // Check if the user clicked OK
+    if ($resultNumOfCurves == "OK") 
+    {
+        // Get the entered value
+        string $enteredValue = `promptDialog -query -text`;
+
+        // Convert the string to a float
+        $numCurves = $enteredValue;
+        // Use the float value as needed
+        print("Used Offset is: " + $enteredValue + "\n");
+    }
+    
+    
+    string $selection[] = `ls -sl`;
+    string $locGrpA[];
+    string $locGrpB[];
+    
+    if (size($selection) == 0) {
+        warning "Please select at least one polygon object.";
+    } else {
+        for ($index = 0; $index < size($selection); $index++) {
+            string $obj = $selection[$index];
+            string $shapeArray[] = `listRelatives -children -type "mesh" $obj`;
+            string $shape = "";
+            if (size($shapeArray) > 0) {
+                $shape = $shapeArray[0];
+            }
+            if (size($shapeArray) == 0) {
+                warning ($obj + " does not have a polygon shape.");
+                continue;
+            }
+            
+            float $bbox[] = `xform -q -ws -bb $obj`;
+            float $minX = $bbox[0], $minY = $bbox[1], $minZ = $bbox[2];
+            float $maxX = $bbox[3], $maxY = $bbox[4], $maxZ = $bbox[5];
+            
+            string $group = `group -em -name ($obj + "_locators")`;
+            
+            string $locators[];
+            for ($i = 0; $i < $numCurves; $i++) {
+                float $randX = rand($minX, $maxX);
+                float $randY = rand($minY, $maxY);
+                float $randZ = rand($minZ, $maxZ);
+                
+                string $locator[] = `spaceLocator -name ($group + "_locator_" + $i)`;
+                xform -worldSpace -translation $randX $randY $randZ $locator;
+                parent $locator[0] $group;
+                $locators[size($locators)] = $locator[0];
+            }
+            
+            for ($loc in $locators) {
+                setAttr ($loc + "Shape.localScaleX") 10;
+                setAttr ($loc + "Shape.localScaleY") 10;
+                setAttr ($loc + "Shape.localScaleZ") 10;
+                string $constraint[] = `geometryConstraint -weight 1 $obj $loc`;
+                delete $constraint;
+            }
+            
+            if ($index == 0) {
+                $locGrpA = $locators;
+            } else if ($index == 1) {
+                $locGrpB = $locators;
+            }
+        }
+    }
+    
+    select -r $locGrpA;
+    select -add $locGrpB;
+
+
+    //// curve generation from locators
+    {
+        //Dialog popup to get a value from the user
+        string $resultGravity = `promptDialog 
+        -title "Enter Gravity" 
+        -message "Gravity:" 
+        -text "0.1"
+        -button "OK" 
+        -button "Cancel" 
+        -defaultButton "OK" 
+        -cancelButton "Cancel" 
+        -dismissString "Cancel"`;
+        
+        float $gravity = 0.1;
+        
+        // Check if the user clicked OK
+        if ($resultGravity == "OK") 
+        {
+            // Get the entered value
+            string $enteredValue = `promptDialog -query -text`;
+
+            // Convert the string to a float
+            $gravity = $enteredValue;
+            // Use the float value as needed
+            print("Used Offset is: " + $enteredValue + "\n");
+        }
+        
+        
+        //Dialog popup to get a value from the user
+        string $resultRand = `promptDialog 
+        -title "Enter Randomization" 
+        -message "Randomization:" 
+        -text "0.5"
+        -button "OK" 
+        -button "Cancel" 
+        -defaultButton "OK" 
+        -cancelButton "Cancel" 
+        -dismissString "Cancel"`;
+        
+        float $randValue = 0.5;
+        
+        // Check if the user clicked OK
+        if ($resultRand == "OK") 
+        {
+            // Get the entered value
+            string $enteredValue = `promptDialog -query -text`;
+
+            // Convert the string to a float
+            $randValue = $enteredValue;
+            // Use the float value as needed
+            print("Used Offset is: " + $enteredValue + "\n");
+        }
+        
+        
+        // Get the selected locators
+        string $selectedLocators[] = `ls -sl`; // Select both groups of locators
+        
+        // Split the selected locators into two groups
+        int $numCurves = size($selectedLocators) / 2;
+        string $group1[];
+        string $group2[];
+        
+        // Manually slice the selected locators into two groups
+        for ($i = 0; $i < $numCurves; $i++) {
+            $group1[$i] = $selectedLocators[$i];
+            $group2[$i] = $selectedLocators[$i + $numCurves];
+        }
+        
+        // Check if the number of locators in each group is the same
+        if (size($group1) == size($group2)) {
+            string $curves[];
+            
+            // Create curves between corresponding locators
+            for ($i = 0; $i < size($group1); $i++) {
+                // Get the world positions of both locators in the pair
+                float $pos1[] = `xform -q -ws -t $group1[$i]`;
+                float $pos2[] = `xform -q -ws -t $group2[$i]`;
+                
+                // Create a curve between the two locators
+                string $curve = `curve -d 1 -p $pos1[0] $pos1[1] $pos1[2] -p $pos2[0] $pos2[1] $pos2[2]`;
+                
+                // Store the curve name in an array
+                $curves[$i] = $curve;
+            }
+            
+            // Resample all the curves with the given rebuild parameters
+            select $curves; // Select all the generated curves
+            performRebuildCurveSet 1 1 0 0.01 10 3 1 0 0 1 0 1 0.05; // Perform the rebuild
+
+            // Apply controlled bending logic to each rebuilt curve
+            for ($i = 0; $i < size($curves); $i++) {
+                string $curve = $curves[$i]; // Get the current curve name
+                
+                // Get the number of CVs (control vertices) of the curve
+                int $numCVs = `getAttr ($curve + ".spans")` + `getAttr ($curve + ".degree")`;
+                
+                // Get the start and end positions of the curve (first and last CV)
+                float $startPos[] = `pointPosition ($curve + ".cv[0]")`;  // Start position of the curve (first CV)
+                float $endPos[] = `pointPosition ($curve + ".cv[" + ($numCVs - 1) + "]")`; // End position of the curve (last CV)
+                
+                // Calculate the length of the curve (distance between start and end)
+                float $length = sqrt(pow(($endPos[0] - $startPos[0]), 2) + pow(($endPos[1] - $startPos[1]), 2) + pow(($endPos[2] - $startPos[2]), 2));
+                
+                // Maximum vertical offset as a fraction of the total length
+                float $maxBendFactor = $gravity;  // Maximum vertical offset percentage (adjust for more or less bending)
+                float $maxOffset = $length * $maxBendFactor;  // Maximum displacement based on the curve's length
+                
+                // Introduce randomization in the gravity (max offset variation)
+                //float $randValue = 0.5;
+                float $randMin = 1-$randValue;
+                float $randMax = 1+$randValue;
+                float $randomFactor = rand($randMin, $randMax);  // Randomization factor (randomize within 10% of the gravity value)
+                $maxOffset = $maxOffset * $randomFactor;  // Apply the randomization
+                
+                // Loop through each CV (except for the first and last ones)
+                for ($j = 1; $j < $numCVs - 1; $j++) {
+                    // Normalize t from 0 to 1 based on the CV index
+                    float $t = (float)$j / (float)($numCVs - 1);
+                    
+                    // Calculate the smooth parabolic vertical offset using a parabolic curve
+                    // Parabolic displacement: maxOffset * (1 - 4 * pow(t - 0.5, 2))
+                    float $offset = $maxOffset * (1 - 4 * pow($t - 0.5, 2)); // Parabolic shape
+                    
+                    // Get the current position of the CV in world space
+                    float $cvPos[] = `pointPosition ($curve + ".cv[" + $j + "]")`;
+                    
+                    // Convert the world position to local space using the curve's transformation
+                    float $localPos[] = `pointPosition -l ($curve + ".cv[" + $j + "]")`;
+                    
+                    // Apply the displacement in the Y direction (bend) in local space
+                    $localPos[1] = $localPos[1] - $offset; // Move CV downward by the offset
+                    
+                    // Convert the local space position back to world space and set it
+                    move -a $localPos[0] $localPos[1] $localPos[2] ($curve + ".cv[" + $j + "]");
+                }
+                
+                // Optionally, print the name of the smoothed curve
+                // print("Controlled bend applied to curve: " + $curve + "\n");
+            }
+            
+            string $grpSweep = `group -empty -name "sweep_GPR"`;
+            
+            // SweepMesh section
+            for ($curveObj in $curves)
+            {
+                select $curveObj;
+                sweepMeshFromCurve -oneNodePerCurve 1;
+                string $sweepNode[] = `ls -sl`;
+                //print $sweepNode;
+                setAttr ($sweepNode[0] + ".scaleProfileX") 1;
+                setAttr ($sweepNode[0] + ".interpolationMode") 1;
+                setAttr ($sweepNode[0] + ".interpolationSteps") 40;
+                setAttr ($sweepNode[0] + ".createUVs") 1;
+                setAttr ($sweepNode[0] + ".scaleProfileX") (rand(0.2,3));
+                string $sweepObject[] = `listConnections $sweepNode[0]`;
+                parent $sweepObject[1] $grpSweep;
+            }
+            
+            //string $sweepObjects[] = `ls -sl`;
+            //string $grpSweep = `group -n "sweep_GPR" $sweepObjects`;
+            string $grpCrv = `group -n "curves_GPR" $curves`;
+            
+            
+        } else {
+            print("Error: The number of locators in each group must be the same.\n");
+        }
+
+    }
+}
+
+// Spiral from Curves
+global proc ddSpiralFromCurves()
+{
+    string $sel[] = `ls -sl`;
+    if (size($sel) == 0) {
+        error "No curves selected. Please select at least one curve.";
+    }
+    
+    //Dialog popup to get a value from the user
+    string $numOfLoopsResult = `promptDialog 
+    -title "Enter Number of Loops" 
+    -message "Number of Loops:" 
+    -text "10"
+    -button "OK" 
+    -button "Cancel" 
+    -defaultButton "OK" 
+    -cancelButton "Cancel" 
+    -dismissString "Cancel"`;
+
+    // Initialize a variable to store the int value
+    int $numOfLoops = 10;
+
+    // Check if the user clicked OK
+    if ($numOfLoopsResult == "OK") 
+    {
+        // Get the entered value
+        string $enteredValue = `promptDialog -query -text`;
+
+        // Convert the string to a int
+        $numOfLoops = (int)$enteredValue;
+        // Use the int value as needed
+        print("Used Number of Loops is: " + $numOfLoops + "\n");
+    }
+    
+    /*
+    ///////////////////////////////////////////////////////////////////
+    //Dialog popup to get a value from the user
+    string $rndMultiplierResult = `promptDialog 
+    -title "Enter Randomization Intensity" 
+    -message "Randomization Intenisty:" 
+    -text "1"
+    -button "OK" 
+    -button "Cancel" 
+    -defaultButton "OK" 
+    -cancelButton "Cancel" 
+    -dismissString "Cancel"`;
+
+    // Initialize a variable to store the int value
+    float $rndMultiplier = 1.0;
+
+    // Check if the user clicked OK
+    if ($rndMultiplierResult == "OK") 
+    {
+        // Get the entered value
+        string $enteredValue = `promptDialog -query -text`;
+
+        // Convert the string to a int
+        $rndMultiplier = (float)$enteredValue;
+        // Use the int value as needed
+        print("Used Randomization is: " + $rndMultiplier + "\n");
+    }
+    */
+    
+    //Dialog popup to get a value from the user
+    string $radiusResult = `promptDialog 
+    -title "Enter Radius" 
+    -message "Radius:" 
+    -text "20"
+    -button "OK" 
+    -button "Cancel" 
+    -defaultButton "OK" 
+    -cancelButton "Cancel" 
+    -dismissString "Cancel"`;
+
+    // Initialize a variable to store the int value
+    int $radius = 20;
+
+    // Check if the user clicked OK
+    if ($radiusResult == "OK") 
+    {
+        // Get the entered value
+        string $enteredValue = `promptDialog -query -text`;
+
+        // Convert the string to a int
+        $radius = (int)$enteredValue;
+        // Use the int value as needed
+        print("Used Radius is: " + $radius + "\n");
+    }
+    
+
+    for ($curve in $sel) {
+        string $shape[] = `listRelatives -s $curve`;
+        
+        
+        if (size($shape) > 0 && `objectType -isType "nurbsCurve" $shape[0]`) {
+            float $curveLength = `arclen -ch false $shape[0]`;
+            
+            // Generate pHelix with appropriate length and radius
+            string $helix[] = `polyHelix -c $numOfLoops -h $curveLength -w $radius -r 1 -sa 3 -sco 20 -sc 0 -d 1 -ax 0 1 0 -rcp 0 -cuv 3 -ch 1`;
+            string $helixObj = $helix[0];
+            
+            // Apply CurveWarp Deformer
+            select -r $curve;
+            select -add $helixObj;
+            createCurveWarp;
+            string $history[] = `listHistory $helixObj`;
+            string $warpNode = "";
+            for ($node in $history) {
+                if (`objectType $node` == "curveWarp") {
+                    $warpNode = $node;
+                    break;
+                }
+            }
+            if ($warpNode == "") {
+                error "Curve Warp deformer was not created successfully.";
+            }
+            setAttr ($warpNode + ".keepLength") 0;
+            
+            // Modify scale curve for better shape
+            setAttr ($warpNode + ".scaleCurve[0].scaleCurve_Value") 0;
+            setAttr ($warpNode + ".scaleCurve[3].scaleCurve_Value") 0;
+            //delete -ch $warpNode;
+            delete -ch $helixObj;
+            
+            // Extract an edge loop to create a curve
+            select ($helixObj + ".vtx[2]");
+            select -add ($helixObj + ".vtx[5]");
+            ConvertSelectionToContainedEdges;
+            PolySelectConvert 20;
+            performSelContiguousEdges 0;
+            string $newCurveArray[] = `polyToCurve -form 2 -degree 3`;
+            string $newCurve = $newCurveArray[0];
+            delete -ch $newCurve;
+            
+            
+            // Rebuild the spiral curve for better control
+            rebuildCurve -ch 0 -rpo 1 -rt 0 -end 1 -kr 0 -kcp 0 -kep 1 -kt 0 -s 100 -d 3 $newCurve;
+            //delete -ch $newCurve;
+            /*
+            // Modify loop density
+            int $cvCount = `getAttr ($newCurve + ".spans")` + `getAttr ($newCurve + ".degree")`;
+            float $randomPhase = rand(0, 360); // Randomize density per curve
+            for ($i = 0; $i < $cvCount; $i++) {
+                float $pos[] = `pointPosition ($newCurve + ".cv[" + $i + "]")`;
+                float $falloff = sin(deg_to_rad($i * 180 / $cvCount));
+                float $factor = 1.0 + (sin(deg_to_rad($i * 10 + $randomPhase)) * 0.002 * $rndMultiplier * $falloff); // Sinusoidal variation for denser/farther loops
+                
+                // Move CV along the curve's tangent
+                float $newPos[] = { $pos[0], $pos[1], $pos[2] * $factor };
+                xform -ws -t $newPos[0] $newPos[1] $newPos[2] ($newCurve + ".cv[" + $i + "]");
+            }
+            */
+            // Delete history on the generated spiral
+            //delete -ch $newCurve;
+            // Rename and clean up
+            delete $helixObj;
+            $newCurve = `rename $newCurve ($curve + "_spiral")`;
+        } 
+        
+        else 
+        {
+            warning ("Skipping non-curve object: " + $curve);
+        }
+    }
+}
+
+
+global proc ddSpiralFromCurvesHistory()
+{
+    string $sel[] = `ls -sl`;
+    if (size($sel) == 0) {
+        error "No curves selected. Please select at least one curve.";
+    }
+    
+    //Dialog popup to get a value from the user
+    string $numOfLoopsResult = `promptDialog 
+    -title "Enter Number of Loops" 
+    -message "Number of Loops:" 
+    -text "10"
+    -button "OK" 
+    -button "Cancel" 
+    -defaultButton "OK" 
+    -cancelButton "Cancel" 
+    -dismissString "Cancel"`;
+
+    // Initialize a variable to store the int value
+    int $numOfLoops = 10;
+
+    // Check if the user clicked OK
+    if ($numOfLoopsResult == "OK") 
+    {
+        // Get the entered value
+        string $enteredValue = `promptDialog -query -text`;
+
+        // Convert the string to a int
+        $numOfLoops = (int)$enteredValue;
+        // Use the int value as needed
+        print("Used Number of Loops is: " + $numOfLoops + "\n");
+    }
+    
+    
+    
+    //Dialog popup to get a value from the user
+    string $radiusResult = `promptDialog 
+    -title "Enter Radius" 
+    -message "Radius:" 
+    -text "20"
+    -button "OK" 
+    -button "Cancel" 
+    -defaultButton "OK" 
+    -cancelButton "Cancel" 
+    -dismissString "Cancel"`;
+
+    // Initialize a variable to store the int value
+    int $radius = 20;
+
+    // Check if the user clicked OK
+    if ($radiusResult == "OK") 
+    {
+        // Get the entered value
+        string $enteredValue = `promptDialog -query -text`;
+
+        // Convert the string to a int
+        $radius = (int)$enteredValue;
+        // Use the int value as needed
+        print("Used Radius is: " + $radius + "\n");
+    }
+    
+
+    for ($curve in $sel) {
+        string $shape[] = `listRelatives -s $curve`;
+        
+        
+        if (size($shape) > 0 && `objectType -isType "nurbsCurve" $shape[0]`) {
+            float $curveLength = `arclen -ch false $shape[0]`;
+            
+            // Generate pHelix with appropriate length and radius
+            string $helix[] = `polyHelix -c (3*$numOfLoops) -h $curveLength -w $radius -r 1 -sa 3 -sco 20 -sc 0 -d 1 -ax 0 1 0 -rcp 0 -cuv 3 -ch 1`;
+            string $helixObj = $helix[0];
+            //delete -ch $helixObj;
+
+            // Apply CurveWarp Deformer
+            select -r $curve;
+            select -add $helixObj;
+            createCurveWarp;
+            string $history[] = `listHistory $helixObj`;
+            string $warpNode = "";
+            for ($node in $history) {
+                if (`objectType $node` == "curveWarp") {
+                    $warpNode = $node;
+                    break;
+                }
+            }
+            if ($warpNode == "") {
+                error "Curve Warp deformer was not created successfully.";
+            }
+            setAttr ($warpNode + ".keepLength") 0;
+            
+            // Modify scale curve for better shape
+            setAttr ($warpNode + ".scaleCurve[0].scaleCurve_Value") 0;
+            setAttr ($warpNode + ".scaleCurve[3].scaleCurve_Value") 0;
+            //delete -ch $warpNode;
+            //delete -ch $helixObj;
+            setAttr ($helixObj + ".visibility") 0;
+            
+            // Extract an edge loop to create a curve
+            select ($helixObj + ".vtx[2]");
+            select -add ($helixObj + ".vtx[5]");
+            ConvertSelectionToContainedEdges;
+            PolySelectConvert 20;
+            performSelContiguousEdges 0;
+            string $newCurveArray[] = `polyToCurve -form 2 -degree 3`;
+            string $newCurve = $newCurveArray[0];
+            //delete -ch $newCurve;
+            setAttr ($helix[1] + ".coils") $numOfLoops; 
+            
+            
+            // Rebuild the spiral curve for better control
+            rebuildCurve -ch 0 -rpo 1 -rt 0 -end 1 -kr 0 -kcp 0 -kep 1 -kt 0 -s 100 -d 3 $newCurve;
+            //delete -ch $newCurve;
+            
+            // Delete history on the generated spiral
+            //delete -ch $newCurve;
+            // Rename and clean up
+            //delete $helixObj;
+            $newCurve = `rename $newCurve ($curve + "_spiral")`;
+        } 
+        
+        else 
+        {
+            warning ("Skipping non-curve object: " + $curve);
+        }
+    }
+}
+
+// Make Curves Dynamic
+global proc ddDynamicCurves()
+{
+    string $curves[] = `ls -sl`;
+    for ($curve in $curves)
+    {
+        setAttr ($curve + ".visibility") 0;
+    }
+    
+    doMakeCurvesNDynamic 2 { "1", "0", "1", "1", "0"  };
+    string $hairSysNode[] = `ls -sl`;
+    setAttr ($hairSysNode[0] + ".selfCollide") 1;
+    setAttr ($hairSysNode[0] + ".selfCollideWidthScale") 1;
+    setAttr ($hairSysNode[0] + ".collideWidthOffset") 1;
+    setAttr ($hairSysNode[0] + ".friction") 1;
+    setAttr ($hairSysNode[0] + ".bendResistance") 0;
+    setAttr ($hairSysNode[0] + ".damp") 0.1;
+    setAttr "nucleus1.spaceScale" 0.05;
+}
+
+// Multi Curve Wrap 
+global proc ddMultiCurveWrap()
+{
+    string $lastObj[]=`ls -sl -tail 1`;
+    string $objs[] = stringArrayRemove (`ls -sl -tail 1`, `ls -sl -fl`);
+    int $numCurvs = size($objs);
+    
+    for ($item in $objs)
+    {
+        string $obj[] = `duplicate -n ($lastObj[0] + "_" + $item) $lastObj[0] `;
+        
+        select -r $item;
+        select -add $obj[0];
+        CurveWarp;
+        
+        string $shapes[] = `listRelatives -s $obj[0]`;
+        string $curveWarpNode[] = `listConnections -type "curveWarp" $shapes[0]`;
+        print $curveWarpNode;
+        
+        setAttr ($curveWarpNode[0] + ".keepLength") 0;
+        
+    }
+}
+
+// Multi Sweep Mesh From Curves
+global proc ddMultiSweep()
+{
+    string $curves[] = `ls -sl`;
+    
+    /*
+    for ($curveObj in $curves)
+    {
+        select $curveObj;
+        sweepMeshFromCurve -oneNodePerCurve 1;
+        string $sweepNode[] = `ls -sl`;
+        //print $sweepNode;
+        setAttr ($sweepNode[0] + ".scaleProfileX") 1;
+        setAttr ($sweepNode[0] + ".interpolationMode") 1;
+        setAttr ($sweepNode[0] + ".interpolationSteps") 40;
+        setAttr ($sweepNode[0] + ".createUVs") 1;
+        setAttr ($sweepNode[0] + ".scaleProfileX") (rand(0.2,3));
+        string $sweepObject[] = `listConnections $sweepNode[0]`;
+        parent $sweepObject[1] $grpSweep;
+    }
+    */
+
+    if (`pluginInfo -query -loaded sweep`== 0)
+    {
+        loadPlugin -quiet sweep;
+    }
+
+    if (size($curves) == 0)
+    {
+        print "No curves are selected!";
+    }
+
+    else if (size($curves) <2)
+    {
+        string $grpSweep = `group -empty -name "sweep_GPR"`;
+        for ($curveObj in $curves)
+        {
+            select $curveObj;
+            sweepMeshFromCurve -oneNodePerCurve 0;
+            string $sweepNode[] = `ls -sl`;
+            //print $sweepNode;
+            setAttr ($sweepNode[0] + ".scaleProfileX") 1;
+            setAttr ($sweepNode[0] + ".interpolationMode") 1;
+            setAttr ($sweepNode[0] + ".interpolationSteps") 40;
+            setAttr ($sweepNode[0] + ".createUVs") 1;
+            setAttr ($sweepNode[0] + ".scaleProfileX") (rand(0.2,3));
+            string $sweepObject[] = `listConnections $sweepNode[0]`;
+            parent $sweepObject[1] $grpSweep;
+        }
+    }
+
+    else
+    {
+        string $grpSweep = `group -empty -name "sweep_GPR"`;
+        {
+            // create a confirm dialog with a yes and no button. Specif
+            $response = `confirmDialog -title "Choose" 
+                        -message "Share Sweep Node?"
+                        -button "Yes" 
+                        -button "No"
+                        -button "Cancel"
+                        -cancelButton "Cancel"
+                        -defaultButton "Yes"
+                        -dismissString "Cancel"
+                        `;
+
+            // check response	  
+            if( $response == "Yes" ) 
+            {
+                print("User says Y\n");
+                for ($curveObj in $curves)
+                {
+                    select $curveObj;
+                    sweepMeshFromCurve -oneNodePerCurve 0;
+                    string $sweepNode[] = `ls -sl`;
+                    //print $sweepNode;
+                    setAttr ($sweepNode[0] + ".scaleProfileX") 1;
+                    setAttr ($sweepNode[0] + ".interpolationMode") 1;
+                    setAttr ($sweepNode[0] + ".interpolationSteps") 40;
+                    setAttr ($sweepNode[0] + ".createUVs") 1;
+                    setAttr ($sweepNode[0] + ".scaleProfileX") (rand(0.2,3));
+                    string $sweepObject[] = `listConnections $sweepNode[0]`;
+                    parent $sweepObject[1] $grpSweep;
+                }
+            } 
+            
+            else if( $response == "No" ) 
+            {
+                print("User says No\n");
+                for ($curveObj in $curves)
+                {
+                    select $curveObj;
+                    sweepMeshFromCurve -oneNodePerCurve 1;
+                    string $sweepNode[] = `ls -sl`;
+                    //print $sweepNode;
+                    setAttr ($sweepNode[0] + ".scaleProfileX") 1;
+                    setAttr ($sweepNode[0] + ".interpolationMode") 1;
+                    setAttr ($sweepNode[0] + ".interpolationSteps") 40;
+                    setAttr ($sweepNode[0] + ".createUVs") 1;
+                    setAttr ($sweepNode[0] + ".scaleProfileX") (rand(0.2,3));
+                    string $sweepObject[] = `listConnections $sweepNode[0]`;
+                    parent $sweepObject[1] $grpSweep;
+                }
+            }	
+            
+            else if( $response == "Cancel" ) 
+            {
+                //print("User says Cancel\n");
+            }
+            
+                        
+        }
+    }
+}
+
+
+global proc ddSelectParentConstaraints()
+{
+    string $sel[] = `ls -type "parentConstraint"`;
+    print $sel;
+    if (size($sel) > 0)
+    {
+        select "*parentConstraint*";
+    }
+    else
+    {
+        print "No Parent Constraint in the scene";
+    }
+}
+
+global proc ddDelPins()
+{
+    string $nodes[] = `ls -tr "pinInput*"`;
+    delete $nodes;
+}
+
+//////////// GUI ////////////////
+if (`control -exists ddCurveCable`)deleteUI -control ddCurveCable;
+
+global proc ddCurveCable()
+{
+
+    int $btnWidthA = 140;
+    int $btnHeightA = 45;
+    int $mWA = 0;
+
+    string $scriptDir = `internalVar -userScriptDir`;
+    string $fontType = "tinyBoldLabelFont";
+
+
+    gridLayout -numberOfColumns 2 -cellWidthHeight $btnWidthA $btnHeightA ddCurveCablePanel;
+
+    shelfButton -fn $fontType -fla 0 -st "textOnly" -image1 "polySmooth.png" -bgc 0.0 0.4 0.4 -annotation "Cables Between Selected Polygon Objects Single Sweep - select 2 Object and run the script" -label "Cables Between Meshes \nSingle Sweep" -command ddCablesBetweenMeshesSingleSweep;
+    shelfButton -fn $fontType -fla 0 -st "textOnly" -image1 "polySmooth.png" -bgc 0.0 0.5 0.5 -annotation "Cables Between Selected Polygon Objects Multi Sweep - select 2 Object and run the script" -label "Cables Between Meshes \nMulti Sweep" -command ddCablesBetweenMeshesMultiSweep;
+    
+    shelfButton -fn $fontType -fla 0 -st "textOnly" -image1 "polySmooth.png" -bgc 0.0 0.3 0.4 -annotation "Cable Generation Between Locators Single Sweep" -label "Cables Between Locators \nSingle Sweep" -command ddGenCablesBetweenLocatorsSingleSweep;
+    shelfButton -fn $fontType -fla 0 -st "textOnly" -image1 "polySmooth.png" -bgc 0.0 0.4 0.5 -annotation "Cable Generation Between Locators Multi Sweep" -label "Cables Between Locators \nMulti Sweep" -command ddGenCablesBetweenLocatorsMultiSweep;
+    
+    shelfButton -fn $fontType -fla 0 -st "iconAndTextHorizontal" -image1 "locator.png" -bgc 0.7 0.7 0.7 -annotation "Genearte Locators on Selected Poly Objects" -label "Generate Locators \nfor Selected Objecs" -command ddLocatorGen;
+    shelfButton -fn $fontType -fla 0 -st "iconAndTextHorizontal" -image1 "locator.png" -bgc 0.7 0.7 0.8 -annotation "Genearte Locators on Selected Poly Objects with Parent Constraints" -label "Constrained Locators \nfor Objecs" -command ddLocatorGenConstrained;
+    
+    shelfButton -fn $fontType -fla 0 -st "iconAndTextHorizontal" -image1 "locator.png" -bgc 0.6 0.6 0.6 -annotation "Create a single Locator" -label "Create a Locator" -command "spaceLocator -p 0 0 0";
+    shelfButton -fn $fontType -fla 0 -st "iconAndTextHorizontal" -image1 "locator.png" -bgc 0.6 0.6 0.7 -annotation "Genearte Locators on Selected Poly Shapes with Proximity Pin Constraints" -label "Constrained Locators \nfor Shapes" -command ddLocatorGenShapeConstrained;
+    //shelfButton -fn $fontType -fla 1 -st "textOnly" -mw $mWA -bgc 0.27 0.27 0.27 ;
+
+    shelfButton -fn $fontType -fla 0 -st "iconAndTextHorizontal" -image1 "curveEP.png" -bgc 0.2 0.2 0.2 -annotation "Generate Curves Between Locators (Select even number of locators)" -label "Curves Between \nSelected Locators" -command ddGenCurvesBetweenLocators;
+    shelfButton -fn $fontType -fla 0 -st "iconAndTextHorizontal" -image1 "curveEP.png" -bgc 0.2 0.2 0.3 -annotation "Generate Constrained Curves Between Locators (Select even number of locators)" -label "Constrained Curves \nBetween Locators" -command ddGenCurvesBetweenLocatorsConstrained;
+    //shelfButton -fn $fontType -fla 1 -st "textOnly" -mw $mWA -bgc 0.27 0.27 0.27 ;
+
+    shelfButton -fn $fontType -fla 0 -st "iconAndTextHorizontal" -image1 "curveEP.png" -bgc 0.3 0.3 0.3 -annotation "Generate Curves Between Selected Polygon Objects - select 2 Object and run the script" -label "Curves Between \nObjects" -command ddCurvesBetweenMeshes;
+    shelfButton -fn $fontType -fla 0 -st "iconAndTextHorizontal" -image1 "curveEP.png" -bgc 0.3 0.3 0.4 -annotation "Generate Curves Between Selected Polygon Objects - select 2 Object and run the script, with Constrained" -label "Constrained Curves \nBetween Objects" -command ddCurvesBetweenMeshesConstraints;
+    //shelfButton -fn $fontType -fla 1 -st "textOnly" -mw $mWA -bgc 0.27 0.27 0.27 ;
+    shelfButton -fn $fontType -fla 0 -st "iconAndTextHorizontal" -image1 "curveEP.png" -bgc 0.4 0.4 0.4 -annotation "Spiral from Curves" -label "Spiral from Curves" -command ddSpiralFromCurves;
+    shelfButton -fn $fontType -fla 0 -st "iconAndTextHorizontal" -image1 "curveEP.png" -bgc 0.4 0.4 0.5 -annotation "Spiral from Curves with History" -label "Spiral from Curves \nwith History" -command ddSpiralFromCurvesHistory;
+    
+    shelfButton -fn $fontType -fla 0 -st "iconAndTextHorizontal" -image1 "hairDynamicCurves.png" -bgc 0.0 0.2 0.4 -annotation "Make Curves Dynamic" -label "Make Curves \nDynamic" -command ddDynamicCurves;
+    shelfButton -fn $fontType -fla 0 -st "iconAndTextHorizontal" -image1 "nClothCreatePassive.png" -bgc 0.1 0.3 0.5 -annotation "Create Passive Collider" -label "Create Passive \nCollider" -command makeCollideNCloth;
+
+    shelfButton -fn $fontType -fla 0 -st "iconAndTextHorizontal" -image "shelf_sweepMeshFromCurve.png" -mw $mWA -bgc 0.2 0.2 0.2 -annotation "Create sweep mesh based on selected curve(s)" -label "Sweep mesh" -command ddMultiSweep;
+    shelfButton -al "center" -font $fontType -label "Interactive \nPlayback" -i "interactivePlayback.png" -st "iconAndTextHorizontal" -rpt 1 -flat 1 -mw $mWA -annotation "Allows interaction with objects during playback" -command "InteractivePlayback" -sourceType "mel" ;
+
+    shelfButton -fn $fontType -fla 0 -st "iconAndTextHorizontal" -image "commandButton.png" -mw $mWA -bgc 0.3 0.3 0.3 -annotation "Remove Hair and Nucleus Nodes" -label "Remove Hair and \nNucleus Nodes" -command ("delete \"*hair*\"; delete \"*nucleus*\"");
+    shelfButton -fn $fontType -fla 0 -st "textOnly" -image1 "polySmooth.png" -bgc 0.2 0.2 0.2 -annotation "Delete pinLicators" -label "Delete pinLicators" -command ddDelPins;
+
+    shelfButton -fn $fontType -fla 0 -st "textOnly" -image1 "polySmooth.png" -bgc 0.2 0.2 0.2 -annotation "Select Parent Constraints" -label "Select Parent \nConstraints" -command ddSelectParentConstaraints;
+
+    shelfButton -fn $fontType -fla 0 -st "textOnly" -image1 "polySmooth.png" -bgc 0.7 0.5 0.3 -annotation "Multi Curve Wrap" -label "Multi Curve Wrap" -command ddMultiCurveWrap;
+
+    setParent ..;
+}
+workspaceControl -label "ddCurveCable Panel 1.0" -retain false -floating true -uiScript "ddCurveCable();" ddCurveCable;
