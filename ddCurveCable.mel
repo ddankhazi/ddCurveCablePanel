@@ -3062,7 +3062,7 @@ global proc ddCurveCable()
     shelfButton -fn $fontType -fla 0 -st "iconAndTextHorizontal" -image1 "locator.png" -bgc 0.7 0.7 0.8 -annotation "Genearte Locators on Selected Poly Objects with Parent Constraints" -label "Constrained Locators \nfor Objecs" -command ddLocatorGenConstrained;
     
     shelfButton -fn $fontType -fla 0 -st "iconAndTextHorizontal" -image1 "locator.png" -bgc 0.6 0.6 0.6 -annotation "Create a single Locator(s) - if objects are selected this will create locators at the pivot points of the objects." -label "Create Locator(s)" -command ddCreateLocators;
-    shelfButton -fn $fontType -fla 0 -st "iconAndTextHorizontal" -image1 "locator.png" -bgc 0.6 0.6 0.7 -annotation "Genearte Locators on Selected Poly Shapes with Proximity Pin Constraints" -label "Constrained Locators \nfor Shapes" -command ddLocatorGenShapeConstrained;
+    shelfButton -fn $fontType -fla 0 -st "iconAndTextHorizontal" -image1 "locator.png" -bgc 0.6 0.6 0.7 -annotation "Genearte Locators on Selected Poly Shapes with UV Pin Constraints" -label "Constrained Locators \nfor Shapes" -command ddLocatorGenShapeConstrained;
     //shelfButton -fn $fontType -fla 1 -st "textOnly" -mw $mWA -bgc 0.27 0.27 0.27 ;
 
     shelfButton -fn $fontType -fla 0 -st "iconAndTextHorizontal" -image1 "curveEP.png" -bgc 0.2 0.2 0.2 -annotation "Generate Curves Between Locators (Select even number of locators)" -label "Curves Between \nSelected Locators" -command ddGenCurvesBetweenLocators;
